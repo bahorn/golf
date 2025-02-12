@@ -15,11 +15,14 @@ _start:
         db      0x90, 0x90   
         
         db      0x90, 0x90
-        jmp     _next
+        jmp     _skip
 
         dw      2                       ; e_type
         dw      62                      ; e_machine
-        dd      1                       ; e_version
+; e_version
+_skip:
+        db      0x90, 0x90
+        jmp     _next
 phdr:
         dd      1                       ; e_entry       ; p_type
         dd      5                                       ; p_flags
