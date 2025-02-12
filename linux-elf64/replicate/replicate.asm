@@ -14,12 +14,15 @@ _start:
         lea     rdi, [rel _name]        ; 7 bytes
         push    rdi                     ; 1 byte
         mov     al, 85                  ; 2 bytes
-        jmp     _next                   ; 2 bytes
+        jmp     _skip                   ; 2 bytes
         
         dw      2                       ; e_type
         dw      62                      ; e_machine
-_name: ; we get to overlay this with the version!
-        dd      0x34                    ; e_version
+_skip: ; we get to overlay this with e_version
+        dec esi                         ; 2 bytes. yeah, this works for the
+                                        ; mode. Just want to make all the bits
+                                        ; 1.
+        jmp _next
 phdr:
         dd      1                       ; e_entry       ; p_type
         dd      5                                       ; p_flags
@@ -28,11 +31,10 @@ phdr:
 
 _next:
 ; Now finishing up the creat() call
-        dec     esi                     ; 2 bytes. yeah, this works for the
-                                        ; mode. Just want to make all the bits
-                                        ; 1.
         syscall                         ; 2 bytes
-        jmp     _body
+        pop     rsi                     ; 1 byte
+        xchg    eax, edi                ; 1 byte
+        jmp     _body                   ; 2 bytes
 
         dw      0x38                    ; e_phentsize
         dw      1                       ; e_phnum       ; p_filesz
@@ -44,12 +46,10 @@ _next:
 
 _body:
 ; Move onto write()'ing this to the file we created.
-        pop     rsi                     ; 1 byte
         sub     sil, _name - $$         ; 4 bytes
 
         mov     dl, _end - $$           ; 2 bytes
 
-        xchg    eax, edi                ; 1 byte
         mov     al, 1                   ; 2 bytes.
                                         ; rdi, which we get this from, is 
                                         ; 0x50000005e, we drop the higher bits
@@ -62,5 +62,6 @@ _body:
                                         ; by just inc'ing it.
         mov     al, 60                  ; 2 bytes.
         syscall                         ; 2 bytes
-
+_name:
+        db "4"
 _end:
