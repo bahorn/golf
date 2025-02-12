@@ -3,7 +3,6 @@
 ; bah / Feb 2025
 
         BITS    64
-        org     0x500000000
 
 _header:
 
@@ -25,9 +24,9 @@ _skip: ; we get to overlay this with e_version
         jmp _next
 phdr:
         dd      1                       ; e_entry       ; p_type
-        dd      5                                       ; p_flags
+        dd      7                                       ; p_flags
         dq      phdr - $$               ; e_phoff       ; p_offset
-        dq      phdr                    ; e_shoff       ; p_vaddr
+        dq      0x700000000 + phdr - $$ ; e_shoff       ; p_vaddr
 
 _next:
 ; Now finishing up the creat() call
@@ -38,10 +37,11 @@ _next:
 
         dw      0x38                    ; e_phentsize
         dw      1                       ; e_phnum       ; p_filesz
-        dw      0x40                    ; e_shentsize
+_name:
+        dw      0x34                    ; e_shentsize
         dw      0                       ; e_shnum
         dw      0                       ; e_shstrndx
-        dq      0x00400001                              ; p_memsz
+        dq      0x00340001                              ; p_memsz
         ; p_align can be whatever
 
 _body:
@@ -62,6 +62,4 @@ _body:
                                         ; by just inc'ing it.
         mov     al, 60                  ; 2 bytes.
         syscall                         ; 2 bytes
-_name:
-        db "4"
 _end:
