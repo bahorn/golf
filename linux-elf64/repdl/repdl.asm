@@ -82,7 +82,7 @@ argv_1:
         db         "-L"
 argv_2:
 argv_3:
-        db "binary.golf/5/5#"
+        db "binary.golf/6/6#"
 bin:
         db "/bin/curl"
 _end:
